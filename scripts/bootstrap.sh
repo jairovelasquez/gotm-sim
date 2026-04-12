@@ -17,8 +17,8 @@ apt-get update -y
 
 echo "--- Installing system packages ---"
 apt-get install -y \
-  python3.12 \
-  python3.12-venv \
+  python3 \
+  python3-venv \
   python3-pip \
   nginx \
   git \
@@ -42,7 +42,7 @@ echo "--- Fixing ownership ---"
 chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Creating virtual environment ---"
-python3.12 -m venv venv
+python3 -m venv venv
 
 echo "--- Installing Python dependencies ---"
 ./venv/bin/pip install --upgrade pip
