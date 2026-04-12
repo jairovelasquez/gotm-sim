@@ -4,7 +4,7 @@ set -ex
 # Update and install basics
 apt-get update -y
 apt-get upgrade -y
-apt-get install -y python3.12 python3.12-venv python3-pip nginx git curl unzip
+apt-get install -y python3 python3-venv python3-pip nginx git curl unzip
 
 # Create app directory
 mkdir -p /opt/gotm-sim
