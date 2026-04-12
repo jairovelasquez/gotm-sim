@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from app.models import StrategyInput, Decisions
 from app.services.db import get_db
 from app.persistence.models import DBSession
-from app.simulation.engine import calculate_final_kpis, get_staged_updates
+from app.simulation.engine import get_staged_updates
 from app.ai.bedrock import interpret_strategy, generate_executive_summary
 from app.reports.generator import generate_report
 from app.scenarios.default import SCENARIO
@@ -24,7 +24,7 @@ async def welcome(request: Request):
 async def submit_strategy(text: str = Form(...), db=Depends(get_db)):
     session_id = str(uuid.uuid4())
     interpreted = interpret_strategy(text)
-    ai_fallback = "Bedrock" not in str(interpreted)  # crude check
+    ai_fallback = interpreted.pop("_fallback", True)
     session = DBSession(
         id=session_id,
         strategy_text=text,
@@ -54,6 +54,10 @@ async def submit_decisions(session_id: str = Form(...), pricing: str = Form(...)
 async def simulation_page(request: Request, session: str):
     return templates.TemplateResponse("simulation.html", {"request": request, "session_id": session})
 
+@router.get("/decisions", response_class=HTMLResponse)
+async def decisions_page(request: Request, session: str):
+    return templates.TemplateResponse("decisions.html", {"request": request, "session_id": session})
+
 @router.get("/api/simulation/stream/{session_id}")
 async def simulation_stream(session_id: str, db=Depends(get_db)):
     async def event_generator():
@@ -68,11 +72,13 @@ async def simulation_stream(session_id: str, db=Depends(get_db)):
             # simulate real-time
             await asyncio.sleep(1.8)  # realistic delay
         # save final
-        final_kpis = stage["kpis"]
+        final_stage = staged[-1]
+        final_kpis = final_stage["kpis"]
         final_kpis["final_score"] = final_kpis.pop("final_score", 0)  # already there
         session.kpis = final_kpis
-        session.competitor_event = stage.get("competitor", {}).get("event", "")
-        session.competitor_commentary = stage.get("competitor", {}).get("commentary", "")
+        competitor = next((s.get("competitor") for s in staged if s.get("competitor")), {})
+        session.competitor_event = competitor.get("event", "")
+        session.competitor_commentary = competitor.get("commentary", "")
         session.executive_summary = generate_executive_summary(session.__dict__)
         session.final_score = final_kpis["final_score"]
         # generate report
