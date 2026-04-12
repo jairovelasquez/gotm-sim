@@ -64,7 +64,7 @@ print("Python dependency check passed")
 PY
 
 echo "--- Initializing database ---"
-./venv/bin/python scripts/init_db.py
+PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
 
 echo "--- Installing systemd service ---"
 cp gotm-sim.service /etc/systemd/system/gotm-sim.service
