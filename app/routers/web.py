@@ -98,3 +98,23 @@ async def download_report(session_id: str, format: str = "html", db=Depends(get_
     if format == "md":
         return FileResponse(f"reports/{session_id}.md", media_type="text/markdown", filename=f"vibefuel-report-{session_id[:8]}.md")
     return FileResponse(f"reports/{session_id}.html", media_type="text/html", filename=f"vibefuel-report-{session_id[:8]}.html")
+
+@router.get("/strategy", response_class=HTMLResponse)
+async def strategy_page(request: Request):
+    return templates.TemplateResponse("strategy.html", {"request": request})
+
+@router.get("/reports", response_class=HTMLResponse)
+async def reports_page(request: Request, db=Depends(get_db)):
+    sessions = (
+        db.query(DBSession)
+        .filter(DBSession.report_html.isnot(None))
+        .order_by(DBSession.created_at.desc())
+        .all()
+    )
+    return templates.TemplateResponse(
+        "reports.html",
+        {
+            "request": request,
+            "sessions": sessions,
+        },
+    )

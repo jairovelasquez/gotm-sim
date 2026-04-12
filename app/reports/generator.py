@@ -1,3 +1,4 @@
+import json
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from app.config import REPORTS_DIR, BASE_DIR
