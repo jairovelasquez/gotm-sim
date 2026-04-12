@@ -15,7 +15,7 @@ cd /opt/gotm-sim
 # Clone or pull latest code
 if [ ! -d ".git" ]; then
     echo "Cloning repository..."
-    git clone https://github.com/YOUR_USERNAME/gotm-sim.git . || {
+    git clone https://github.com/jairovelasquez/gotm-sim.git . || {
         echo "❌ Clone failed. Make sure repo is public."
         exit 1
     }

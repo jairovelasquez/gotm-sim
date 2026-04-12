@@ -11,7 +11,7 @@ mkdir -p /opt/gotm-sim
 cd /opt/gotm-sim
 
 # Clone your repo (CHANGE THIS TO YOUR ACTUAL REPO)
-git clone https://github.com/YOUR_USERNAME/gotm-sim.git . || echo "Repo already cloned"
+git clone https://github.com/jairovelasquez/gotm-sim.git . || echo "Repo already cloned"
 
 # Run bootstrap
 chmod +x scripts/bootstrap.sh
