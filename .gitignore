@@ -1,0 +1,52 @@
+# --- Terraform ---
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Ignore sensitive variable files
+*.tfvars
+*.tfvars.json
+
+# Ignore override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore plan output files
+*.tfplan
+*.plan
+
+# Lock file (OPTIONAL: usually you SHOULD commit this)
+# Uncomment the next line if you don't want to commit it
+# .terraform.lock.hcl
+
+# --- Environment / Secrets ---
+.env
+.env.*
+*.secret
+secrets.*
+
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# IntelliJ
+.idea/
+
+# --- Logs ---
+*.log
+
+# --- Misc ---
+*.bak
+*.tmp
+*.swp

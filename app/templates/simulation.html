@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Live Simulation{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <h1 class="heading-font text-5xl font-semibold mb-2 text-center">Live Launch Simulation</h1>
+    <p class="text-center text-zinc-400 mb-12">Watch your strategy unfold in real time</p>
+
+    <div class="bg-zinc-900 rounded-3xl p-10">
+        <div class="flex justify-between items-center mb-10">
+            <div id="current-stage" class="text-lg font-medium">Stage 1/4 • Initial Reaction</div>
+            <div class="h-2.5 bg-zinc-800 rounded-full w-96 overflow-hidden">
+                <div id="simulation-progress" class="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 w-0 transition-all duration-1000"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12" id="kpi-grid">
+            <!-- Populated by JS -->
+        </div>
+
+        <div id="insight-panel" class="bg-zinc-950 border border-zinc-700 rounded-3xl p-8 min-h-[140px] text-lg"></div>
+
+        <div id="competitor-panel" class="mt-8"></div>
+
+        <button id="start-simulation-btn"
+                class="mt-12 w-full bg-white text-black font-semibold py-6 rounded-3xl text-xl">
+            Start Live Simulation
+        </button>
+    </div>
+</div>
+
+<script>
+    // KPI cards will be injected by JS on load + updated via SSE
+    const kpiTemplates = [
+        {key: "awareness", label: "Awareness", unit: "%"},
+        {key: "cac", label: "CAC", unit: "$"},
+        {key: "conversion", label: "Conversion", unit: "%"},
+        {key: "sales", label: "Projected Sales", unit: "k"},
+        {key: "roas", label: "ROAS", unit: "x"},
+        {key: "marketShare", label: "Market Share", unit: "%"},
+        {key: "launchEfficiency", label: "Efficiency", unit: ""}
+    ];
+
+    function createKPICards() {
+        const grid = document.getElementById('kpi-grid');
+        grid.innerHTML = kpiTemplates.map(kpi => `
+            <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 kpi-card">
+                <div class="text-xs uppercase tracking-widest text-zinc-500">${kpi.label}</div>
+                <div id="kpi-${kpi.key}" class="kpi-value text-cyan-400 mt-3 font-mono">—</div>
+                <div class="text-xs text-zinc-500">${kpi.unit}</div>
+            </div>
+        `).join('');
+    }
+
+    window.onload = () => {
+        createKPICards();
+        // Attach SSE logic from previous script (can be moved to static/js if preferred)
+    };
+</script>
+{% endblock %}

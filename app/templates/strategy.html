@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Define Strategy{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="heading-font text-5xl font-semibold mb-3">Your Strategy</h1>
+    <p class="text-zinc-400 mb-10">Describe how you plan to launch VibeFuel in 2–4 sentences.</p>
+
+    <form id="strategy-form" action="/api/strategy" method="post" class="space-y-8">
+        <textarea name="text" rows="6"
+            class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-lg focus:outline-none focus:border-cyan-400 resize-none"
+            placeholder="Launch as a premium functional beverage using TikTok and Instagram influencers, targeting trend-seeking Gen Z in major cities..."></textarea>
+
+        <button type="submit"
+                class="w-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-xl py-6 rounded-3xl transition-all flex items-center justify-center gap-x-3">
+            <i class="fa-solid fa-arrow-right"></i>
+            Submit Strategy & Continue
+        </button>
+    </form>
+</div>
+{% endblock %}

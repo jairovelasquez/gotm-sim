@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Launch Results{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+        <h1 class="heading-font text-6xl font-bold mb-3">Launch Complete</h1>
+        <div class="inline-flex items-center gap-4 bg-emerald-900 text-emerald-400 px-8 py-3 rounded-3xl">
+            <span class="text-4xl">🎯</span>
+            <span class="text-3xl font-semibold">Final Score: <span class="text-white">{{ session.final_score }}</span>/100</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8">
+        <!-- KPI Summary -->
+        <div class="bg-zinc-900 rounded-3xl p-10">
+            <h2 class="uppercase text-xs tracking-widest mb-6">Final KPIs</h2>
+            <div class="space-y-6">
+                {% for key, value in session.kpis.items() %}
+                <div class="flex justify-between items-center">
+                    <span class="capitalize">{{ key.replace('marketShare', 'Market Share').replace('launchEfficiency', 'Launch Efficiency') }}</span>
+                    <span class="font-mono text-xl">
+                        {% if key == 'cac' %}${% endif %}{{ value }}
+                        {% if key in ['roas'] %}x{% elif key in ['awareness', 'marketShare', 'conversion'] %}%{% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="bg-zinc-900 rounded-3xl p-10">
+            <h2 class="uppercase text-xs tracking-widest mb-6">Executive Summary</h2>
+            <p class="text-zinc-300 leading-relaxed">{{ session.executive_summary }}</p>
+        </div>
+    </div>
+
+    <div class="mt-12 flex gap-6">
+        <a href="/report/{{ session.id }}/download?format=html" 
+           class="flex-1 bg-white text-black font-semibold py-6 rounded-3xl text-center hover:bg-cyan-400 transition-all">
+            Download Full Report (HTML)
+        </a>
+        <a href="/report/{{ session.id }}/download?format=md" 
+           class="flex-1 border border-zinc-700 font-semibold py-6 rounded-3xl text-center hover:bg-zinc-800 transition-all">
+            Download Markdown
+        </a>
+    </div>
+</div>
+{% endblock %}

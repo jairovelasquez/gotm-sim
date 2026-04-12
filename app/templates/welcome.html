@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Welcome - VibeFuel Launch{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2 bg-cyan-950 text-cyan-400 text-sm font-medium px-6 py-3 rounded-3xl mb-8">
+        <i class="fa-solid fa-rocket"></i>
+        URBAN WELLNESS LAUNCH
+    </div>
+
+    <h1 class="heading-font text-6xl font-semibold tracking-tighter mb-6">
+        Launching <span class="text-cyan-400">VibeFuel</span>
+    </h1>
+    <p class="text-2xl text-zinc-400 mb-12">Wellness Beverage for Urban Gen Z</p>
+
+    <div class="bg-zinc-900 rounded-3xl p-10 mb-12 text-left max-w-2xl mx-auto">
+        <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
+            <i class="fa-solid fa-info-circle text-cyan-400"></i>
+            Scenario Brief
+        </h2>
+        <ul class="space-y-4 text-zinc-300">
+            <li><strong>Product:</strong> VibeFuel — Functional wellness drink</li>
+            <li><strong>Market:</strong> Urban Gen Z (18-27), trend-sensitive</li>
+            <li><strong>Competition:</strong> High — crowded category</li>
+            <li><strong>Primary Goal:</strong> Rapid brand awareness</li>
+            <li><strong>Secondary Goal:</strong> Efficient customer acquisition</li>
+        </ul>
+    </div>
+
+    <a href="/strategy" 
+       class="inline-flex items-center gap-x-3 bg-white text-black font-semibold text-lg px-10 py-6 rounded-3xl hover:bg-cyan-400 hover:text-black transition-all">
+        Start My Go-To-Market Strategy
+        <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
+{% endblock %}

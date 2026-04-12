@@ -1,0 +1,25 @@
+[Unit]
+Description=VibeFuel GTM Simulator (FastAPI + Uvicorn)
+After=network.target nginx.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=www-data
+WorkingDirectory=/opt/gotm-sim
+Environment="PATH=/opt/gotm-sim/venv/bin"
+ExecStart=/opt/gotm-sim/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+
+# Restart policy
+Restart=always
+RestartSec=3
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

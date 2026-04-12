@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VibeFuel Launch Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-white p-12 max-w-4xl mx-auto">
+    <div class="border border-cyan-400 rounded-3xl p-12">
+        <h1 class="text-5xl heading-font">VibeFuel Launch Report</h1>
+        <p class="text-cyan-400">Session #{{ session.id[:8] }}</p>
+
+        <div class="mt-12 space-y-10">
+            <div>
+                <h2 class="uppercase text-sm tracking-widest">Strategy</h2>
+                <p class="mt-3 text-lg">{{ session.strategy_text }}</p>
+            </div>
+
+            <div>
+                <h2 class="uppercase text-sm tracking-widest">Decisions</h2>
+                <div class="grid grid-cols-3 gap-6 mt-4">
+                    <div><strong>Pricing:</strong> {{ session.decisions.pricing }}</div>
+                    <div><strong>Segment:</strong> {{ session.decisions.priority_segment }}</div>
+                    <div><strong>Channel:</strong> {{ session.decisions.channel_mix }}</div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="uppercase text-sm tracking-widest">Final Results</h2>
+                <pre class="bg-black p-6 rounded-2xl mt-4 text-sm">{{ session.kpis | tojson(indent=2) }}</pre>
+                <p class="mt-6 text-3xl">Final Score: <strong>{{ session.final_score }}</strong>/100</p>
+            </div>
+
+            <div>
+                <h2 class="uppercase text-sm tracking-widest">Executive Summary</h2>
+                <p class="mt-4 text-lg leading-relaxed">{{ session.executive_summary }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

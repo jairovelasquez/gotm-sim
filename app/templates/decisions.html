@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Make Key Decisions{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="heading-font text-5xl font-semibold mb-10">Key Launch Decisions</h1>
+
+    <form id="decisions-form" action="/api/decisions" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <input type="hidden" name="session_id" value="{{ session_id }}">
+
+        <!-- Pricing -->
+        <div>
+            <label class="block text-sm uppercase tracking-widest text-zinc-500 mb-4">Pricing Approach</label>
+            <select name="pricing" class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl p-6 text-lg focus:border-cyan-400">
+                <option value="premium">Premium Positioning</option>
+                <option value="competitive">Competitive Pricing</option>
+                <option value="intro_offer">Introductory Offer</option>
+                <option value="value_led">Value-Led</option>
+            </select>
+        </div>
+
+        <!-- Segment -->
+        <div>
+            <label class="block text-sm uppercase tracking-widest text-zinc-500 mb-4">Priority Segment</label>
+            <select name="segment" class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl p-6 text-lg focus:border-cyan-400">
+                <option value="genz_trend_seekers">Gen Z Trend Seekers</option>
+                <option value="value_buyers">Value Buyers</option>
+                <option value="premium_lifestyle">Premium Lifestyle</option>
+                <option value="early_adopters">Early Adopters</option>
+            </select>
+        </div>
+
+        <!-- Channel -->
+        <div>
+            <label class="block text-sm uppercase tracking-widest text-zinc-500 mb-4">Channel Mix</label>
+            <select name="channel" class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl p-6 text-lg focus:border-cyan-400">
+                <option value="social_first">Social-First</option>
+                <option value="influencer_led">Influencer-Led</option>
+                <option value="retail_activation">Retail Activation</option>
+                <option value="balanced_mix">Balanced Mix</option>
+            </select>
+        </div>
+
+        <div class="md:col-span-3 mt-8">
+            <button type="submit"
+                    class="w-full bg-white text-black font-semibold text-xl py-7 rounded-3xl hover:bg-cyan-400 transition-all">
+                Launch Simulation →
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VibeFuel GTM Simulator{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .live-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .kpi-value {
+            font-size: 2.25rem;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+    <!-- Navbar -->
+    <nav class="bg-black border-b border-zinc-800 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-cyan-400 rounded-2xl flex items-center justify-center text-black font-bold text-2xl">VF</div>
+                <h1 class="heading-font text-3xl tracking-tight">VibeFuel Simulator</h1>
+            </div>
+            <div class="flex items-center gap-x-8 text-sm">
+                <a href="/" class="hover:text-cyan-400 transition-colors">New Launch</a>
+                <a href="/reports" class="hover:text-cyan-400 transition-colors">Past Reports</a>
+                <div class="flex items-center gap-x-2 bg-zinc-900 px-4 py-2 rounded-3xl text-xs font-mono">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full live-dot"></div>
+                    us-east-1 • LIVE
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-screen-2xl mx-auto px-8 py-10">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        tailwind.config = { content: ["**/*"] }
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
