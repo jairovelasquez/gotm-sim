@@ -2,7 +2,7 @@
 
 **Proof-of-concept** monolithic FastAPI app running on **one EC2 instance** in `us-east-1`.
 
-**Stack**
+## Stack
 - Python 3.12 + FastAPI + Jinja2 + Tailwind (CDN)
 - SQLite (local EBS)
 - Bedrock (Claude 3 Haiku) with graceful fallback
@@ -17,6 +17,32 @@ git clone <your-repo> gotm-sim && cd gotm-sim
 
 # 2. Deploy infrastructure
 cd terraform
-terraform init && terraform apply -auto-approve
+terraform init
+terraform apply -auto-approve
 
-# 3. EC2 will self-bootstrap via user_data.sh → clones repo → runs scripts/bootstrap.sh
+# 3. EC2 will self-bootstrap via user_data.sh -> scripts/bootstrap.sh
+
+# Optional: deploy from your own fork/branch
+terraform apply -auto-approve \
+  -var='repo_url=https://github.com/<you>/gotm-sim.git' \
+  -var='repo_branch=<your-branch>'
+```
+
+## Local run (without Bedrock)
+
+Use this when developing locally and you don't want AWS Bedrock dependency.
+
+```bash
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+BEDROCK_ENABLED=false PYTHONPATH=. ./venv/bin/python -m scripts.init_db
+BEDROCK_ENABLED=false ./venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Then open `http://127.0.0.1:8000`.
+
+## Bedrock notes
+
+- `BEDROCK_ENABLED` defaults to `true`.
+- Set `BEDROCK_ENABLED=false` to force deterministic fallback mode.
+- In AWS, keep `BEDROCK_ENABLED=true` and ensure IAM + Bedrock model access are enabled.

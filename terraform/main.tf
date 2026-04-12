@@ -131,7 +131,10 @@ resource "aws_instance" "app" {
   vpc_security_group_ids = [aws_security_group.sg.id]
   iam_instance_profile   = aws_iam_instance_profile.profile.name
 
-  user_data = file("${path.module}/user_data.sh")
+  user_data = templatefile("${path.module}/user_data.sh", {
+    repo_url    = var.repo_url
+    repo_branch = var.repo_branch
+  })
 
   root_block_device {
     volume_size = 30

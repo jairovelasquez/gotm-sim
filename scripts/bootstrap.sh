@@ -9,6 +9,8 @@ echo "=== Starting VibeFuel GTM Simulator bootstrap ==="
 APP_DIR="/opt/gotm-sim"
 APP_USER="ubuntu"
 APP_GROUP="www-data"
+APP_REPO_URL="${APP_REPO_URL:-https://github.com/jairovelasquez/gotm-sim.git}"
+APP_REPO_BRANCH="${APP_REPO_BRANCH:-main}"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -17,8 +19,8 @@ apt-get update -y
 
 echo "--- Installing system packages ---"
 apt-get install -y \
-  python3.12 \
-  python3.12-venv \
+  python3 \
+  python3-venv \
   python3-pip \
   nginx \
   git \
@@ -31,18 +33,19 @@ cd "$APP_DIR"
 
 if [ ! -d ".git" ]; then
   echo "--- Cloning repository ---"
-  git clone https://github.com/jairovelasquez/gotm-sim.git .
+  git clone --branch "$APP_REPO_BRANCH" "$APP_REPO_URL" .
 else
-  echo "--- Repository already exists, pulling latest ---"
+  echo "--- Repository already exists, updating branch ---"
   git fetch --all
-  git reset --hard origin/main || git pull --ff-only || true
+  git checkout "$APP_REPO_BRANCH" || true
+  git pull --ff-only origin "$APP_REPO_BRANCH" || true
 fi
 
 echo "--- Fixing ownership ---"
 chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Creating virtual environment ---"
-python3.12 -m venv venv
+python3 -m venv venv
 
 echo "--- Installing Python dependencies ---"
 ./venv/bin/pip install --upgrade pip
@@ -64,7 +67,10 @@ print("Python dependency check passed")
 PY
 
 echo "--- Initializing database ---"
-PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+runuser -u "$APP_USER" -- env PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+
+echo "--- Re-applying ownership after build artifacts ---"
+chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Installing systemd service ---"
 cp gotm-sim.service /etc/systemd/system/gotm-sim.service

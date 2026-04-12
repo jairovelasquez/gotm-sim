@@ -2,19 +2,17 @@
 """
 Initialize SQLite database on first boot
 """
-from app.services.db import get_db
-from app.persistence.models import Base, DBSession
+from app.persistence.models import Base, DBSession, engine, SessionLocal
 from sqlalchemy import inspect
-import sys
 
 print("🚀 Initializing SQLite database...")
 
-with get_db() as db:
+with SessionLocal() as db:
     # Create tables if they don't exist
-    Base.metadata.create_all(db.get_bind())
+    Base.metadata.create_all(bind=engine)
     
     # Quick sanity check
-    inspector = inspect(db.get_bind())
+    inspector = inspect(engine)
     tables = inspector.get_table_names()
     print(f"✅ Tables created: {tables}")
     
@@ -34,7 +32,7 @@ with get_db() as db:
         db.add(test_session)
         db.commit()
         print("✅ Test record inserted successfully")
-    except Exception as e:
+    except Exception:
         print("⚠️  Test record skipped (already exists)")
 
 print("✅ Database initialization complete!")

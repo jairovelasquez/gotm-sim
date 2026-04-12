@@ -10,3 +10,4 @@ REPORTS_DIR.mkdir(exist_ok=True)
 
 DB_PATH = DATA_DIR / "gotm.db"
 BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+BEDROCK_ENABLED = os.getenv("BEDROCK_ENABLED", "true").lower() in {"1", "true", "yes", "on"}

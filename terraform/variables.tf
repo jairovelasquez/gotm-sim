@@ -16,3 +16,13 @@ variable "volume_size" {
 variable "project_name" {
   default = "gotm-sim"
 }
+
+variable "repo_url" {
+  description = "Git repository URL cloned by EC2 bootstrap"
+  default     = "https://github.com/jairovelasquez/gotm-sim.git"
+}
+
+variable "repo_branch" {
+  description = "Git branch checked out by EC2 bootstrap"
+  default     = "main"
+}
