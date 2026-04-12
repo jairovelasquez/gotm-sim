@@ -64,7 +64,10 @@ print("Python dependency check passed")
 PY
 
 echo "--- Initializing database ---"
-PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+runuser -u "$APP_USER" -- env PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+
+echo "--- Re-applying ownership after build artifacts ---"
+chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Installing systemd service ---"
 cp gotm-sim.service /etc/systemd/system/gotm-sim.service
