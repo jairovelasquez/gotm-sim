@@ -1,59 +1,101 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
-echo "🚀 Starting VibeFuel GTM Simulator Bootstrap..."
+LOG_FILE="/var/log/gotm-bootstrap.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
-# Update system
+echo "=== Starting VibeFuel GTM Simulator bootstrap ==="
+
+APP_DIR="/opt/gotm-sim"
+APP_USER="ubuntu"
+APP_GROUP="www-data"
+
+export DEBIAN_FRONTEND=noninteractive
+
+echo "--- Updating apt metadata ---"
 apt-get update -y
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-apt-get install -y python3.12 python3.12-venv python3-pip nginx git curl
 
-# Create app directory
-mkdir -p /opt/gotm-sim
-cd /opt/gotm-sim
+echo "--- Installing system packages ---"
+apt-get install -y \
+  python3.12 \
+  python3.12-venv \
+  python3-pip \
+  nginx \
+  git \
+  curl \
+  unzip
 
-# Clone or pull latest code
+echo "--- Ensuring app directory exists ---"
+mkdir -p "$APP_DIR"
+cd "$APP_DIR"
+
 if [ ! -d ".git" ]; then
-    echo "Cloning repository..."
-    git clone https://github.com/jairovelasquez/gotm-sim.git . || {
-        echo "❌ Clone failed. Make sure repo is public."
-        exit 1
-    }
+  echo "--- Cloning repository ---"
+  git clone https://github.com/jairovelasquez/gotm-sim.git .
 else
-    echo "Pulling latest changes..."
-    git pull
+  echo "--- Repository already exists, pulling latest ---"
+  git fetch --all
+  git reset --hard origin/main || git pull --ff-only || true
 fi
 
-# Setup Python virtual environment
+echo "--- Fixing ownership ---"
+chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
+
+echo "--- Creating virtual environment ---"
 python3.12 -m venv venv
-venv/bin/pip install --upgrade pip
-venv/bin/pip install -r requirements.txt
 
-# Initialize database
-echo "Initializing SQLite database..."
-venv/bin/python scripts/init_db.py
+echo "--- Installing Python dependencies ---"
+./venv/bin/pip install --upgrade pip
+./venv/bin/pip install -r requirements.txt
 
-# Nginx Configuration
-echo "Configuring Nginx..."
-cp nginx.conf /etc/nginx/sites-available/default
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-rm -f /etc/nginx/sites-enabled/default.old 2>/dev/null || true
+echo "--- Verifying required Python modules ---"
+./venv/bin/python - <<'PY'
+import importlib
+mods = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "sqlalchemy",
+    "boto3",
+]
+for mod in mods:
+    importlib.import_module(mod)
+print("Python dependency check passed")
+PY
 
-# Test and restart Nginx
-nginx -t && systemctl restart nginx
+echo "--- Initializing database ---"
+./venv/bin/python scripts/init_db.py
 
-# Systemd Service
-echo "Installing systemd service..."
-cp gotm-sim.service /etc/systemd/system/
+echo "--- Installing systemd service ---"
+cp gotm-sim.service /etc/systemd/system/gotm-sim.service
 systemctl daemon-reload
-systemctl enable --now gotm-sim
+systemctl enable gotm-sim
 
-# Final status
-echo "========================================"
-echo "✅ Bootstrap completed!"
-echo "App should be available at: http://$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)"
-echo ""
-echo "Run these to check status:"
-echo "  sudo systemctl status gotm-sim"
-echo "  sudo journalctl -u gotm-sim -f"
-echo "========================================"
+echo "--- Applying nginx config ---"
+cp nginx.conf /etc/nginx/sites-available/default
+rm -f /etc/nginx/sites-enabled/default.old
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+echo "--- Testing nginx config ---"
+nginx -t
+
+echo "--- Restarting services ---"
+systemctl restart nginx
+systemctl restart gotm-sim
+
+echo "--- Waiting for app to come up ---"
+for i in $(seq 1 20); do
+  if curl -fsS http://127.0.0.1:8000/ >/dev/null; then
+    echo "App is responding on 127.0.0.1:8000"
+    break
+  fi
+  echo "App not ready yet ($i/20)"
+  sleep 2
+done
+
+echo "--- Final service status ---"
+systemctl --no-pager --full status gotm-sim || true
+systemctl --no-pager --full status nginx || true
+
+echo "=== Bootstrap completed ==="
+echo "Log file: $LOG_FILE"

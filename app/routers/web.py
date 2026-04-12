@@ -9,6 +9,7 @@ from app.ai.bedrock import interpret_strategy, generate_executive_summary
 from app.reports.generator import generate_report
 from app.scenarios.default import SCENARIO
 import uuid
+import asyncio
 import json
 from datetime import datetime
 
