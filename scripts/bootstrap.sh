@@ -17,8 +17,8 @@ apt-get update -y
 
 echo "--- Installing system packages ---"
 apt-get install -y \
-  python3.12 \
-  python3.12-venv \
+  python3 \
+  python3-venv \
   python3-pip \
   nginx \
   git \
@@ -42,7 +42,7 @@ echo "--- Fixing ownership ---"
 chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Creating virtual environment ---"
-python3.12 -m venv venv
+python3 -m venv venv
 
 echo "--- Installing Python dependencies ---"
 ./venv/bin/pip install --upgrade pip
@@ -64,7 +64,10 @@ print("Python dependency check passed")
 PY
 
 echo "--- Initializing database ---"
-PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+runuser -u "$APP_USER" -- env PYTHONPATH=/opt/gotm-sim ./venv/bin/python -m scripts.init_db
+
+echo "--- Re-applying ownership after build artifacts ---"
+chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
 echo "--- Installing systemd service ---"
 cp gotm-sim.service /etc/systemd/system/gotm-sim.service

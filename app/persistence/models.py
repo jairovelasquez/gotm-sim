@@ -3,7 +3,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 from app.config import DB_PATH
 
-engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
+engine = create_engine(
+    f"sqlite:///{DB_PATH}",
+    echo=False,
+    connect_args={"check_same_thread": False},
+)
 Base = declarative_base()
 
 class DBSession(Base):
