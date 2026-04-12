@@ -9,6 +9,8 @@ echo "=== Starting VibeFuel GTM Simulator bootstrap ==="
 APP_DIR="/opt/gotm-sim"
 APP_USER="ubuntu"
 APP_GROUP="www-data"
+APP_REPO_URL="${APP_REPO_URL:-https://github.com/jairovelasquez/gotm-sim.git}"
+APP_REPO_BRANCH="${APP_REPO_BRANCH:-main}"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -31,11 +33,12 @@ cd "$APP_DIR"
 
 if [ ! -d ".git" ]; then
   echo "--- Cloning repository ---"
-  git clone https://github.com/jairovelasquez/gotm-sim.git .
+  git clone --branch "$APP_REPO_BRANCH" "$APP_REPO_URL" .
 else
-  echo "--- Repository already exists, pulling latest ---"
+  echo "--- Repository already exists, updating branch ---"
   git fetch --all
-  git reset --hard origin/main || git pull --ff-only || true
+  git checkout "$APP_REPO_BRANCH" || true
+  git pull --ff-only origin "$APP_REPO_BRANCH" || true
 fi
 
 echo "--- Fixing ownership ---"

@@ -21,6 +21,11 @@ terraform init
 terraform apply -auto-approve
 
 # 3. EC2 will self-bootstrap via user_data.sh -> scripts/bootstrap.sh
+
+# Optional: deploy from your own fork/branch
+terraform apply -auto-approve \
+  -var='repo_url=https://github.com/<you>/gotm-sim.git' \
+  -var='repo_branch=<your-branch>'
 ```
 
 ## Local run (without Bedrock)
