@@ -1,12 +1,16 @@
 import json
 import boto3
 from botocore.exceptions import ClientError, BotoCoreError
-from app.config import BEDROCK_MODEL
+from app.config import BEDROCK_MODEL, BEDROCK_ENABLED
 from app.models import InterpretedStrategy
 from app.utils.fallback import fallback_interpret_strategy, fallback_executive_summary
 
 def _invoke_model(prompt: str, system_prompt: str = None) -> str | None:
     """Low-level Bedrock invoke with error handling"""
+    if not BEDROCK_ENABLED:
+        print("ℹ️ Bedrock disabled by BEDROCK_ENABLED flag; using fallback")
+        return None
+
     try:
         client = boto3.client("bedrock-runtime", region_name="us-east-1")
         
@@ -45,7 +49,7 @@ def interpret_strategy(text: str) -> dict:
     Falls back to deterministic keyword analysis if Bedrock fails.
     """
     if not text or len(text.strip()) < 10:
-        return fallback_interpret_strategy(text or "")
+        return {**fallback_interpret_strategy(text or ""), "_fallback": True}
 
     system_prompt = "You are an expert Go-To-Market strategist for consumer wellness products."
 
@@ -66,7 +70,7 @@ Focus on awareness, pricing, channel, and segment alignment."""
 
     if not result:
         print("⚠️ Using fallback strategy interpretation")
-        return fallback_interpret_strategy(text)
+        return {**fallback_interpret_strategy(text), "_fallback": True}
 
     try:
         # Clean possible markdown code blocks
@@ -78,11 +82,11 @@ Focus on awareness, pricing, channel, and segment alignment."""
         
         parsed = json.loads(cleaned.strip())
         validated = InterpretedStrategy(**parsed)
-        return validated.model_dump()
+        return {**validated.model_dump(), "_fallback": False}
         
     except Exception as e:
         print(f"⚠️ JSON parsing failed from Bedrock: {e}")
-        return fallback_interpret_strategy(text)
+        return {**fallback_interpret_strategy(text), "_fallback": True}
 
 
 def generate_executive_summary(session_data: dict) -> str:
