@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from app.models import StrategyInput, Decisions
 from app.config import BASE_DIR
 from app.services.db import get_db
-from app.persistence.models import DBSession
+from app.persistence.models import DBSession, SessionLocal
 from app.simulation.engine import get_staged_updates, calculate_final_kpis
 from app.ai.bedrock import interpret_strategy, generate_executive_summary
 from app.reports.generator import generate_report
@@ -75,34 +75,44 @@ async def decisions_page(request: Request, session: str):
     return templates.TemplateResponse("decisions.html", {"request": request, "session_id": session})
 
 @router.get("/api/simulation/stream/{session_id}")
-async def simulation_stream(session_id: str, db=Depends(get_db)):
+async def simulation_stream(session_id: str):
     async def event_generator():
-        session = db.query(DBSession).filter(DBSession.id == session_id).first()
-        if not session or not session.decisions:
-            yield 'data: {"error": "no session"}\n\n'
-            return
-        decisions = Decisions(**session.decisions)
-        staged = get_staged_updates(decisions, session.interpreted_strategy.get("tags", []), "")
-        for stage in staged:
-            yield f"data: {json.dumps(stage)}\n\n"
-            # simulate real-time
-            await asyncio.sleep(1.8)  # realistic delay
-        # save final
-        final_kpis = calculate_final_kpis(decisions, session.interpreted_strategy.get("tags", []))
-        session.kpis = final_kpis
-        competitor = next((s.get("competitor") for s in staged if s.get("competitor")), {})
-        session.competitor_event = competitor.get("event", "")
-        session.competitor_commentary = competitor.get("commentary", "")
-        session.executive_summary = generate_executive_summary(_session_payload(session))
-        session.final_score = final_kpis["final_score"]
+        db = SessionLocal()
         try:
-            md_rel, html_rel = generate_report(_session_payload(session))
-            session.report_md = md_rel
-            session.report_html = html_rel
+            session = db.query(DBSession).filter(DBSession.id == session_id).first()
+            if not session or not session.decisions:
+                yield 'data: {"error": "no session"}\n\n'
+                return
+
+            tags = (session.interpreted_strategy or {}).get("tags", [])
+            decisions = Decisions(**session.decisions)
+            staged = get_staged_updates(decisions, tags, "")
+            for stage in staged:
+                yield f"data: {json.dumps(stage)}\n\n"
+                await asyncio.sleep(1.8)
+
+            final_kpis = calculate_final_kpis(decisions, tags)
+            session.kpis = final_kpis
+            session.final_score = final_kpis["final_score"]
+            competitor = next((s.get("competitor") for s in staged if s.get("competitor")), {})
+            session.competitor_event = competitor.get("event", "")
+            session.competitor_commentary = competitor.get("commentary", "")
+            session.executive_summary = generate_executive_summary(_session_payload(session))
+
+            try:
+                md_rel, html_rel = generate_report(_session_payload(session))
+                session.report_md = md_rel
+                session.report_html = html_rel
+            except Exception as e:
+                print(f"⚠️ Report generation failed for {session_id}: {e}")
+
+            db.commit()
+            yield 'data: {"complete": true}\n\n'
         except Exception as e:
-            print(f"⚠️ Report generation failed for {session_id}: {e}")
-        db.commit()
-        yield 'data: {"complete": true}\n\n'
+            print(f"❌ Simulation stream failed for {session_id}: {e}")
+            yield f'data: {json.dumps({"error": "simulation_failed"})}\n\n'
+        finally:
+            db.close()
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @router.get("/results", response_class=HTMLResponse)
