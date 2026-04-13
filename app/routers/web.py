@@ -87,10 +87,6 @@ async def simulation_stream(session_id: str):
             tags = (session.interpreted_strategy or {}).get("tags", [])
             decisions = Decisions(**session.decisions)
             staged = get_staged_updates(decisions, tags, "")
-            for stage in staged:
-                yield f"data: {json.dumps(stage)}\n\n"
-                await asyncio.sleep(1.8)
-
             final_kpis = calculate_final_kpis(decisions, tags)
             session.kpis = final_kpis
             session.final_score = final_kpis["final_score"]
@@ -107,6 +103,11 @@ async def simulation_stream(session_id: str):
                 print(f"⚠️ Report generation failed for {session_id}: {e}")
 
             db.commit()
+
+            for stage in staged:
+                yield f"data: {json.dumps(stage)}\n\n"
+                await asyncio.sleep(1.8)
+
             yield 'data: {"complete": true}\n\n'
         except Exception as e:
             print(f"❌ Simulation stream failed for {session_id}: {e}")
